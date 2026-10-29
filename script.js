@@ -17,7 +17,7 @@
     { id: "opt-7", text: "穿著有圖案衣服的人" },
     { id: "opt-8", text: "比你矮的人" },
     { id: "opt-9", text: "任意一位老師" },
-    { id: "opt-10", text: "不同班級的同學" },
+    { id: "opt-10", text: "任意一個同學" },
     { id: "opt-11", text: "有當小老師或幹部的人" },
     { id: "opt-12", text: "你今天還沒說過話的人" },
     { id: "opt-13", text: "再抽一次！" },
@@ -129,7 +129,7 @@
   }
 
   // 播放滴答旋轉聲
-  function playTickSound() {
+  function playTickSound(progress = 0) {
     if (!soundEnabled) return;
     initAudioContext();
     if (!audioCtx) return;
@@ -139,9 +139,14 @@
       const gain = audioCtx.createGain();
 
       osc.type = "triangle";
-      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.04);
-
+      // 核心細節：隨著減速進度 (progress 0 -> 1)，初始音調從 500Hz 微微降至 300Hz
+      // 這會給聽覺帶來非常真實的「重力/摩擦力減速」暗示
+      const currentFreq = 500 - (progress * 100);
+      osc.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.035);
+      
+      // 音量隨減速微微降低，避免最後一聲太刺耳
+      const volume = 0.15 - (progress * 0.05);
       gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
 
@@ -330,26 +335,28 @@
     if (angleDiff < 0) angleDiff += 360;
 
     // 多轉 5 ~ 8 圈以增加刺激感
-    const extraSpins = (5 + getRandomInt(0, 4)) * 360;
+    const extraSpins = (8 + getRandomInt(0, 5)) * 360;
     const totalSpinDegree = extraSpins + angleDiff;
 
     // 更新總累積角度
     currentRotation += totalSpinDegree;
 
     // 動畫時間 (4 ~ 5 秒)
-    const duration = 4.5;
+    const duration = 6.5;
     // 確保旋轉時動態套用過場動畫
     const wheelGroup = document.getElementById("wheel-group");
     wheelGroup.style.transformOrigin = "300px 300px"; // 雙重保障中心點
-    wheelGroup.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.85, 0.15, 1)`;
+    wheelGroup.style.transition = `transform ${duration}s cubic-bezier(0.05, 0.99, 0.05, 1)`;
     wheelGroup.style.transform = `rotate(${currentRotation}deg)`;
 
     // 設定 CSS Transition Easing (前快後減速)
     wheelGroup.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.85, 0.15, 1)`;
     wheelGroup.style.transform = `rotate(${currentRotation}deg)`;
 
-    // 監聽旋轉過場，實時觸發齒輪聲
+    // 監聽旋轉過場，實時觸發齒輪聲（精準指針對齊版）
     let lastSliceIndex = -1;
+    let lastTickTime = 0;
+    const minTickInterval = 22; // 防音效重疊卡頓最小間隔 (ms)
     const startTime = performance.now();
 
     function checkTick(now) {
@@ -357,18 +364,27 @@
       const elapsed = (now - startTime) / 1000;
 
       if (elapsed < duration) {
-        // 解析當前真實 DOM 旋轉角度
+        // 1. 正確解析 DOM Matrix 2D 旋轉角度 (0 ~ 360 順時針角度)
         const style = window.getComputedStyle(wheelGroup);
-        const matrix = new WebKitCSSMatrix(style.transform);
-        const angle = Math.round(Math.atan2(matrix.m02, matrix.m00) * (180 / Math.PI));
-        const normalizedAngle = (angle < 0 ? angle + 360 : angle) % 360;
-        
-        const currentSliceIndex = Math.floor(normalizedAngle / sliceAngle);
-        if (currentSliceIndex !== lastSliceIndex) {
-          playTickSound();
-          lastSliceIndex = currentSliceIndex;
+        const matrix = new DOMMatrix(style.transform);
+        let rotationAngle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+        if (rotationAngle < 0) rotationAngle += 360;
+
+        // 2. 精準計算「正上方 12 點鐘 (270度)」指針正下方的 SVG 弧度角度
+        let pointerSvgAngle = (270 - rotationAngle) % 360;
+        if (pointerSvgAngle < 0) pointerSvgAngle += 360;
+
+        // 3. 計算指針當前正壓在哪一個扇形 (0 ~ total-1)
+        const currentSliceIndex = Math.floor(pointerSvgAngle / sliceAngle);
+
+        // 4. 只有在「指針剛好跨過分隔線 (扇形 Index 改變)」且非初始化第一張影格時發聲
+        if (lastSliceIndex !== -1 && currentSliceIndex !== lastSliceIndex && (now - lastTickTime >= minTickInterval)) {
+          const progress = Math.min(1, elapsed / duration);
+          playTickSound(progress);
+          lastTickTime = now;
         }
 
+        lastSliceIndex = currentSliceIndex;
         animationFrameId = requestAnimationFrame(checkTick);
       }
     }
