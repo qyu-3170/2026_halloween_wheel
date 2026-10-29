@@ -1,0 +1,526 @@
+/* ==========================================================================
+   Trick or Spin! — 萬聖節校園命運轉盤 樣式表
+   ========================================================================== */
+
+:root {
+  /* 配色系統 */
+  --bg-color: #21152F;
+  --bg-card: #2D1D40;
+  --pumpkin-orange: #F59E0B;
+  --pumpkin-hover: #D97706;
+  --ghost-purple: #8B5CF6;
+  --cream-white: #FFF1D6;
+  --light-purple: #D9C8EF;
+  --dark-text: #30203D;
+  --danger-red: #EF4444;
+  --border-color: #4A3263;
+
+  /* 字型與過場 */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* 基礎重設 */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--cream-white);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.5;
+}
+
+/* 背景可愛裝飾符號 */
+.bg-decorations {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-item {
+  position: absolute;
+  opacity: 0.18;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+  user-select: none;
+}
+
+.ghost-1 { top: 8%; left: 6%; font-size: 3rem; transform: rotate(-15deg); }
+.pumpkin-1 { top: 12%; right: 8%; font-size: 3.5rem; transform: rotate(12deg); }
+.bat-1 { bottom: 15%; left: 8%; font-size: 2.8rem; transform: rotate(8deg); }
+.star-1 { top: 45%; left: 3%; font-size: 2rem; }
+.moon { top: 5%; right: 25%; font-size: 2.5rem; }
+.candy-1 { bottom: 12%; right: 6%; font-size: 3rem; transform: rotate(-20deg); }
+
+/* 主容器 */
+.app-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 680px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+/* 頂部標題 */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.title-badge {
+  background: var(--ghost-purple);
+  color: var(--cream-white);
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+.main-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--pumpkin-orange);
+  text-shadow: 3px 3px 0px var(--dark-text), 0 0 15px rgba(245, 158, 11, 0.5);
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--light-purple);
+  max-width: 480px;
+}
+
+/* 遊戲轉盤區域 */
+.game-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.wheel-stage {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+/* 指針 */
+.pointer-container {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.wheel-wrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  background-color: var(--dark-text);
+  padding: 8px;
+  border: 4px solid var(--pumpkin-orange);
+}
+
+/* 轉盤 SVG 容器 */
+#wheel-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 轉盤旋轉群組 (核心修正：指定 300px 300px 為旋轉中心點) */
+#wheel-group {
+  transform-origin: 300px 300px;
+  transform-box: view-box;
+  will-change: transform;
+}
+
+/* 按鈕樣式 */
+.btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+  user-select: none;
+  outline: none;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--cream-white);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: var(--dark-text);
+  font-size: 1.25rem;
+  padding: 0.85rem 2.25rem;
+  box-shadow: 0 6px 0 #92400E, 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #92400E, 0 12px 24px rgba(245, 158, 11, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #92400E, 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:disabled {
+  background: #6B7280;
+  color: #D1D5DB;
+  box-shadow: 0 4px 0 #374151;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-secondary {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: var(--cream-white);
+  border: 1.5px solid var(--ghost-purple);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--ghost-purple);
+  color: var(--cream-white);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--light-purple);
+  border: 1.5px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--cream-white);
+}
+
+.btn-danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #FCA5A5;
+  border: 1.5px solid var(--danger-red);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-red);
+  color: white;
+}
+
+.btn-small {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+}
+
+/* 控制工具列 */
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 頁尾 */
+.footer {
+  font-size: 0.85rem;
+  color: var(--light-purple);
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+/* 彈窗 Modal 基礎 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 9, 23, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  opacity: 1;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-card {
+  background-color: var(--bg-card);
+  border: 2px solid var(--ghost-purple);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(139, 92, 246, 0.3);
+  transform: scale(1);
+  transition: transform var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modal-overlay.hidden .modal-card {
+  transform: scale(0.9);
+}
+
+/* 結果卡片特化 */
+.result-card {
+  text-align: center;
+  border-color: var(--pumpkin-orange);
+  box-shadow: var(--shadow-lg), 0 0 35px rgba(245, 158, 11, 0.4);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-decor {
+  font-size: 1.8rem;
+}
+
+.result-title {
+  color: var(--light-purple);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.result-content {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--pumpkin-orange);
+  background-color: rgba(33, 21, 47, 0.6);
+  border: 1px dashed var(--pumpkin-orange);
+  padding: 1.25rem;
+  border-radius: 16px;
+  word-break: break-word;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* 編輯器卡片特化 */
+.editor-card {
+  max-height: 85vh;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-header h2 {
+  font-size: 1.35rem;
+  color: var(--pumpkin-orange);
+}
+
+.close-x-btn {
+  background: none;
+  border: none;
+  color: var(--light-purple);
+  font-size: 1.75rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-x-btn:hover { color: white; }
+
+.editor-desc {
+  font-size: 0.9rem;
+  color: var(--light-purple);
+  text-align: left;
+}
+
+.editor-scroll-area {
+  overflow-y: auto;
+  max-height: 320px;
+  padding-right: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* 自訂捲軸 */
+.editor-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.editor-scroll-area::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+.editor-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--ghost-purple);
+  border-radius: 4px;
+}
+
+.options-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.option-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-index {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--pumpkin-orange);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.option-input {
+  flex: 1;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--cream-white);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.option-input:focus {
+  border-color: var(--pumpkin-orange);
+}
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.delete-btn:hover {
+  background: var(--danger-red);
+  color: white;
+}
+
+.editor-actions-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* 慶祝粒子特效 */
+#particles-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  user-select: none;
+  will-change: transform, opacity;
+  animation: particleFly 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes particleFly {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+/* 響應式調整 */
+@media (max-width: 480px) {
+  .main-title { font-size: 1.9rem; }
+  .subtitle { font-size: 0.85rem; }
+  .btn-primary { font-size: 1.1rem; padding: 0.75rem 1.75rem; }
+  .wheel-stage { max-width: 100%; }
+  .modal-card { padding: 1.25rem; }
+  .result-content { font-size: 1.35rem; }
+}
+
+/* 無障礙：減少動態效果模式 */
+@media (prefers-reduced-motion: reduce) {
+  #wheel-svg, .particle, .modal-card {
+    transition: none !important;
+    animation: none !important;
+  }
+}

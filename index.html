@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trick or Spin! — 萬聖節校園命運轉盤</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 背景裝飾物 -->
+  <div class="bg-decorations" aria-hidden="true">
+    <span class="bg-item ghost-1">👻</span>
+    <span class="bg-item pumpkin-1">🎃</span>
+    <span class="bg-item bat-1">🦇</span>
+    <span class="bg-item star-1">⭐</span>
+    <span class="bg-item moon">🌙</span>
+    <span class="bg-item candy-1">🍬</span>
+  </div>
+
+  <div class="app-container">
+    <!-- 頂部標題與說明 -->
+    <header class="header">
+      <div class="title-badge">🎃 Halloween Special 👻</div>
+      <h1 class="main-title">Trick or Spin!</h1>
+      <p class="subtitle">萬聖節校園命運轉盤．點擊按鈕召喚你的萬聖節任務！</p>
+    </header>
+
+    <!-- 主遊戲區 -->
+    <main class="game-section">
+      <!-- 轉盤容器 -->
+      <div class="wheel-stage">
+        <!-- 固定指針 -->
+        <div class="pointer-container" aria-hidden="true">
+          <svg class="pointer-svg" viewBox="0 0 60 80" width="60" height="80">
+            <defs>
+              <filter id="pointer-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+              </filter>
+            </defs>
+            <!-- 蝙蝠翼造型指針 -->
+            <path d="M 30 75 L 10 20 C 5 10, 15 0, 30 10 C 45 0, 55 10, 50 20 Z" fill="#F59E0B" stroke="#FFF1D6" stroke-width="3" filter="url(#pointer-shadow)"/>
+            <circle cx="30" cy="20" r="6" fill="#21152F"/>
+          </svg>
+        </div>
+
+        <!-- SVG 動態轉盤 -->
+        <div class="wheel-wrapper">
+          <svg id="wheel-svg" viewBox="0 0 600 600" width="100%" height="100%" role="img" aria-label="萬聖節命運轉盤">
+            <!-- 由 JavaScript 動態繪製扇形、文字與裝飾 -->
+          </svg>
+        </div>
+      </div>
+
+      <!-- 操作按鈕區 -->
+      <div class="controls-section">
+        <button id="spin-btn" class="btn btn-primary" type="button">
+          <span class="btn-icon">🎃</span>
+          <span class="btn-text">開始旋轉！</span>
+        </button>
+      </div>
+
+      <!-- 控制列（音效/編輯器開關） -->
+      <div class="toolbar">
+        <button id="sound-toggle-btn" class="btn btn-secondary" type="button" aria-label="切換音效">
+          <span id="sound-icon">🔔</span>
+          <span id="sound-status-text">音效：開啟</span>
+        </button>
+        <button id="open-editor-btn" class="btn btn-secondary" type="button">
+          <span>⚙️ 編輯題庫</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- 頁尾提示 -->
+    <footer class="footer">
+      <p>👻 319 萬聖節同樂．發糖果轉盤！ 🍬</p>
+    </footer>
+  </div>
+
+  <!-- 結果展示彈窗卡片 -->
+  <div id="result-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <div class="modal-card result-card">
+      <div class="modal-decor">✨ 🎃 ✨</div>
+      <h2 id="result-title" class="result-title">你要去發糖果給...</h2>
+      <div id="result-text" class="result-content">——</div>
+      <div class="result-actions">
+        <button id="spin-again-btn" class="btn btn-primary" type="button">再轉一次！</button>
+        <button id="close-result-btn" class="btn btn-outline" type="button">收下命運</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 題庫編輯器彈窗 -->
+  <div id="editor-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+    <div class="modal-card editor-card">
+      <div class="editor-header">
+        <h2 id="editor-title">⚙️ 題庫編輯器</h2>
+        <button id="close-editor-x" class="close-x-btn" aria-label="關閉編輯器">&times;</button>
+      </div>
+      <p class="editor-desc">您可以自訂 2 至 24 個轉盤選項（目前：<span id="option-count">16</span> 格）：</p>
+      
+      <div class="editor-scroll-area">
+        <ul id="options-list" class="options-list">
+          <!-- 由 JS 動態產生選項列表 -->
+        </ul>
+      </div>
+
+      <div class="editor-actions-top">
+        <button id="add-option-btn" class="btn btn-small btn-secondary" type="button">➕ 新增選項</button>
+        <button id="reset-default-btn" class="btn btn-small btn-danger" type="button">🔄 恢復預設題庫</button>
+      </div>
+
+      <div class="editor-footer">
+        <button id="cancel-editor-btn" class="btn btn-outline" type="button">取消</button>
+        <button id="save-editor-btn" class="btn btn-primary" type="button">儲存並更新轉盤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 慶祝粒子特效容器 -->
+  <div id="particles-container" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
